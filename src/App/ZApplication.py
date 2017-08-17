@@ -49,6 +49,13 @@ class ZApplicationWrapper:
         # arrange for the connection to be closed when the request goes away
         cleanup = Cleanup(conn)
         REQUEST._hold(cleanup)
+        # do not let `cleanup` stay referenced by local frame.
+        # this could be dangerous if the frame is held in any traceback
+        # collected e.g. for exceptions raised and caught in ^^^ hooks, because
+        # if so cleanup lifetime will be different from REQUEST lifetime and
+        # thus cleanup will be called at arbitrary time from under GC from
+        # arbitrary thread.
+        del cleanup
 
         conn.setDebugInfo(REQUEST.environ, REQUEST.other)
 
