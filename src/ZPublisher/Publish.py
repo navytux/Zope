@@ -425,18 +425,22 @@ def publish_module_profiled(module_name, stdin=sys.stdin, stdout=sys.stdout,
     finally:
         _plock.release()
 
-    if result is None:
+    #if result is None:
+    if True:
         try:
             error=sys.exc_info()
             file=open(_pfile, 'w')
             file.write(
+            ("# %s -> %s\n" % (path_info, result)) +
             "See the url "
             "http://www.python.org/doc/current/lib/module-profile.html"
             "\n for information on interpreting profiler statistics.\n\n"
                 )
-            sys.stdout=file
-            _pstat.strip_dirs().sort_stats('cumulative').print_stats(250)
-            _pstat.strip_dirs().sort_stats('time').print_stats(250)
+            #sys.stdout=file
+            ps = _pstat.strip_dirs()
+            ps.stream = file
+            ps.sort_stats('cumulative').print_stats(250)
+            ps.sort_stats('time').print_stats(250)
             file.flush()
             file.close()
         except: pass
